@@ -22,6 +22,10 @@ image:
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
+  upload:
+    lines:
+      batch: 30
+      parallelism: 1
 #  podNamespace: beta
 #  apiNamespace: beta
 #  serviceNamespace: beta.svc.cluster.local
@@ -33,6 +37,7 @@ kafka:
   analyticsTopic: beta-hmda-analytics
   signTopic: beta-hmda-sign
   emailTopic: beta-hmda-email
+  security: ""
 
 service:
   type: ClusterIP

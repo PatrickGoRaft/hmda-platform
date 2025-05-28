@@ -3,7 +3,7 @@ import BuildSettings._
 import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 import com.typesafe.sbt.packager.docker._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, akkaHttpSprayJson, testContainers, apacheCommonsIO, log4jToSlf4j, kubernetesApi, scalaLogging)
 
 lazy val sparkDeps =
   Seq(
@@ -11,7 +11,7 @@ lazy val sparkDeps =
     akkaKafkaStreams
   )
 
-lazy val authDeps = Seq(keycloakAdapter, keycloak, keycloakAdmin, jbossLogging, httpClient)
+lazy val authDeps = Seq(keycloakAdmin, jbossLogging, httpClient)
 
 lazy val keycloakServerDeps = Seq(resteasyClient, resteasyJackson, resteasyMulti)
 
@@ -33,7 +33,6 @@ lazy val akkaDeps = Seq(
   akkaCors,
   mskdriver,
   akkaKafkaStreams,
-  embeddedKafka,
   alpakkaS3,
   akkaQuartzScheduler,
   alpakkaFile
@@ -47,8 +46,7 @@ lazy val akkaPersistenceDeps =
     akkaPersistenceQuery,
     akkaClusterShardingTyped,
     akkaPersistenceCassandra,
-    keyspacedriver,
-    cassandraLauncher
+    keyspacedriver
   )
 
 lazy val akkaHttpDeps =
@@ -66,7 +64,7 @@ lazy val dockerSettings = Seq(
     } else dockerBuildCommand.value
   },
   Docker / maintainer := "Hmda-Ops",
-  dockerBaseImage := "eclipse-temurin:23.0.1_11-jdk-alpine",
+  dockerBaseImage := "eclipse-temurin:24_36-jdk-alpine-3.21",
   dockerRepository := Some("hmda"),
   dockerCommands := dockerCommands.value.flatMap {
     case cmd@Cmd("FROM",_) => List(cmd, Cmd("RUN", "apk update"),
