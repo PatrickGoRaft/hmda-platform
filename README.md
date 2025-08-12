@@ -83,11 +83,15 @@ The code base contained in this repository includes the following microservices 
 
 - [HMDA Dashboard](https://github.com/cfpb/hmda-platform/tree/master/hmda-dashboard): Authenticated APIs to view realtime analytics for the filings happening on the platform. The dashboard includes summarized statistics, data trends, and supports data visualizations via frontend.
 
-- [Rate imit](https://github.com/cfpb/hmda-platform/tree/master/rate-limit): Rate limiter service working in-sync with [ambassador](https://www.getambassador.io/docs/latest/topics/running/services/rate-limit-service/) to limit the number of times in a given time period that the API can be called. If the rate limit is reached, a 503 error code is sent.
-
 - [HMDA Data Browser](https://github.com/cfpb/hmda-platform/tree/master/data-browser): Public facing API for [HMDA Data Browser](https://ffiec.cfpb.gov/data-browser/). This API makes the entire dataset available for summarized statistics, deep analysis, as well as geographic map layout.
 
 - [Email Service](https://github.com/cfpb/hmda-platform/tree/master/email-service): Event driven service to send an automated email to the filer on each successful submission.
+
+- [HMDA Quarterly Data Service](https://github.com/cfpb/hmda-platform/tree/master/hmda-quarterly-data-service): Public facing API for  [HMDA Quarterlty Graphs](https://ffiec.cfpb.gov/data-browser/graphs/quarterly/). This API serves the categorical trends of the HMDA data through the filing periods aggregated by quarters.
+
+- [File Proxy](https://github.com/cfpb/hmda-platform/tree/master/file-proxy): Reverse proxy to serve the publication data stored in S3. Allowing for easier, more configurable access control by delegating S3 permissions to app level.
+
+- [HMDA Auth](https://github.com/cfpb/hmda-platform/tree/master/hmda-auth): Support user information updates through the API interfacing with Auth framework.
 
 
 ## HMDA Platform Technical Architecture
@@ -152,26 +156,68 @@ arch -x86_64 asdf install java openjdk-13.0.2
 export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
 ```
 
+---
+If `arch -x86_64` command shows error, e.g. `arch: posix_spawnp: asdf: Bad CPU type in executable`,
+you may need to launch a shell in the `x86_64` architecture, then run the asdf commands:
+```zsh
+env arch -x86_64 zsh --login
+```
+We can run `arch` command in terminal, and verify we're now in `i386` instead of `arm64`.
+
+We can now do the installations in the x86 arch shell:
+```zsh
+asdf plugin-add java https://github.com/halcyon/asdf-java.git
+asdf install java openjdk-13.0.2
+```
+After installation finishes, we can `exit` the x86 shell, and set the `JAVA_HOME` environment variable
+```zsh
+export JAVA_HOME=$HOME/.asdf/installs/java/openjdk-13.0.2
+```
+
 ## Running Locally
 
 ### Running with sbt
 
-The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:
+~~The HMDA Platform can run locally using [`sbt`](https://www.scala-sbt.org/) with an [embedded Cassandra](https://doc.akka.io/docs/alpakka-kafka/current/) and [embedded Kafka](https://doc.akka.io/docs/alpakka-kafka/current/). To get started:~~  
+_removing embedded cassandra allows us to use more up-to-date java versions_
 
+For local development, supporting services need to be started first in docker:
+
+1. Open terminal with `hmda-platform` root as the  working directory
+2. Start the supporting services of Kafka, Cassandra, and PostgreSQL:
+   ```bash
+   docker compose up -d kafka cassandra pg
+   ```
+   * the `-d` option runs the services in detached mode, so we can use the same terminal to the run remaining commands, to stop the services run:
+     ```bash
+     docker compose stop
+     ```
 1. Export the following environment variables:
     ```bash
     export CASSANDRA_CLUSTER_HOSTS=localhost
     export APP_PORT=2551
     ```
-2. Open terminal with `hmda-platform` root as the  working directory
-3. Start sbt and run the platform with the following commands:
+1. With the new Akka dependencies no longer available from the public resolver, we need to use the authenticated URL retrievable from https://account.akka.io/token.
+   Once we get the url from that page, export it as an environment variable (or set it as a env var shell profile):
+   ```bash
+   export AKKA_RESOLVER={url from the akka token web page}
+   ```
+1. Start sbt and run the platform with the following commands:
     ```bash
     sbt
     [...]
     sbt:hmda-root> project hmda-platform
     sbt:hmda-platform> reStart
     ```
-
+### Building and running the .jar       
+To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:   
+   ```bash
+    sbt
+    sbt:root> project check-digit
+    sbt:check-digit>assembly
+   ```
+This task will create a fat jar, which can be executed on any JDK9 compliant JVM:   
+`java -jar target/scala-2.12/check-digit.jar`
 ### Running with docker compose
 
 The platform and it's dependency services, Kafka, Cassandra and PostgreSQL, can run locally using [Docker Compose](https://docs.docker.com/compose/).

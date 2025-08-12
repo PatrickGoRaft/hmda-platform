@@ -5,12 +5,16 @@ on:
       service:
         required: true
         type: string
-      output-file:
-        required: true
-        type: string
 jobs:
   test-service:
     runs-on: ubuntu-latest
+    services:
+      cassandra:
+        image: "cassandra:3.11.4"
+        ports:
+          - "9042:9042"
+    env:
+      HMDA_RUNTIME_MODE: "docker-compose"
 
     steps:
       - name: Checkout
@@ -22,19 +26,26 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'adopt'
 
       - name: Run hmda-platform Tests
         run: |
-          sbt "project ${{ inputs.service }}" "testOnly -- -l actions-ignore" 2>&1 | tee -a ${{ inputs.output-file }}
+          hmdaServices=("hmda-platform" "check-digit" "common" "data-browser" "hmda-analytics" "hmda-data-publisher" "hmda-quarterly-data-service" "hmda-reporting" "institutions-api" "modified-lar" "rate-limit" "ratespread-calculator" "submission-errors")
+          for service in "${hmdaServices[@]}"; do
+            if [ "$service" == ${{ inputs.service }} ]; then
+              sbt "project ${{ inputs.service }}" "testOnly -- -l actions-ignore" 2>&1 | tee -a output-log.txt
+            fi
+          done
         continue-on-error: true
+        env:
+          AKKA_RESOLVER: ${{ secrets.AKKA_RESOLVER }}
 
       - name: Check Test Results
         run: |
-          if [ $(grep 'All tests passed.' ${{ inputs.output-file }} | wc -l) -ne 1 ]; then
+          if [ $(grep 'All tests passed.' output-log.txt | wc -l) -ne 1 ]; then
             echo "One or more projects had failures. Please review the logs."
-            cat ${{ inputs.output-file }}
+            cat output-log.txt
             exit 1
           else
             echo "All tests passed."
