@@ -3,13 +3,13 @@ package hmda.publisher.scheduler
 import java.time.LocalDateTime
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import akka.actor.typed.ActorRef
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.actor.typed.ActorRef
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{CronString, panelCron, panelYears, specificPanelCron, specificPanelYears}
@@ -62,7 +62,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPrivate)
+//    .withCredentialsProvider(awsCredentialsProviderPrivate)
     .withS3RegionProvider(awsRegionProviderPrivate)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -96,7 +96,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
         val now = LocalDateTime.now().minusDays(1)
         val formattedDate = fullDate.format(now)
         val fileName = s"$formattedDate${year}_panel.txt"
-        val s3Path = s"$environmentPrivate/panel/"
+        val s3Path = "dynamic-data/panel/"
         val fullFilePath = SnapshotCheck.pathSelector(s3Path, fileName)
 
         val s3Sink =
@@ -158,7 +158,7 @@ class PanelScheduler(publishingReporter: ActorRef[PublishingReporter.Command], s
       case Failure(t) =>
         publishingReporter ! FilePublishingCompleted(
           schedule,
-          fullFilePath,
+          bucketPrivate+"/"+fullFilePath,
           None,
           Instant.now,
           FilePublishingCompleted.Status.Error(t.getMessage)

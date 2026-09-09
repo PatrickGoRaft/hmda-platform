@@ -1,13 +1,13 @@
 package hmda.api.http.directives
 import java.time.LocalDate
 
-import akka.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
 import hmda.util.Filer
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 
 object CreateFilingAuthorization {
   private val config = ConfigFactory.load()
@@ -27,4 +27,11 @@ object CreateFilingAuthorization {
     if (Filer.checkQuarterlyYear(rulesConfig)(year)) successful
     else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available", path)))
   }
+
+  def isInstitutionsYearAllowed(allowed: Boolean)(successful: Route): Route = extractMatchedPath { path =>
+    if (allowed) successful
+    else complete((BadRequest, ErrorResponse(BadRequest.intValue, "The provided year is not available via the institutions api", path)))
+  }
+
+
 }

@@ -1,14 +1,14 @@
 package hmda.publisher.scheduler
 
-import akka.actor.typed.ActorRef
-import akka.stream.Materializer
-import akka.stream.alpakka.file.ArchiveMetadata
-import akka.stream.alpakka.file.scaladsl.Archive
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3._
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.actor.typed.ActorRef
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.file.ArchiveMetadata
+import org.apache.pekko.stream.connectors.file.scaladsl.Archive
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3._
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import hmda.actor.HmdaActor
 import hmda.publisher.helper.CronConfigLoader.{CronString, combinedMlarCron, combinedMlarYears}
 import hmda.publisher.helper._
@@ -40,6 +40,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
     with PublisherComponent2022
     with PublisherComponent2023
     with PublisherComponent2024
+    with PublisherComponent2025
     with ModifiedLarHeader
     with PGTableNameLoader
     with PublicAWSConfigLoader
@@ -57,7 +58,7 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
   val s3Settings = S3Settings(context.system)
     .withBufferType(MemoryBufferType)
-    .withCredentialsProvider(awsCredentialsProviderPublic)
+//    .withCredentialsProvider(awsCredentialsProviderPublic)
     .withS3RegionProvider(awsRegionProviderPublic)
     .withListBucketApiVersion(ListBucketVersion2)
 
@@ -76,12 +77,12 @@ class CombinedMLarPublicScheduler(publishingReporter: ActorRef[PublishingReporte
 
         val fileNameHeader = s"${year}_combined_mlar_header.txt"
         val zipNameHeader = s"${year}_combined_mlar_header.zip"
-        val s3PathHeader = s"$environmentPublic/dynamic-data/combined-mlar/$year/header/"
+        val s3PathHeader = s"modified-lar/combined-mlar/$year/"
         val fullFilePathHeader     = SnapshotCheck.pathSelector(s3PathHeader, zipNameHeader)
 
         val fileName = s"${year}_combined_mlar.txt"
         val zipFileName = s"${year}_combined_mlar.zip"
-        val s3Path = s"$environmentPublic/dynamic-data/combined-mlar/$year/"
+        val s3Path = s"modified-lar/combined-mlar/$year/"
         val fullFilePath     = SnapshotCheck.pathSelector(s3Path, zipFileName)
 
 

@@ -1,17 +1,17 @@
 package hmda.uli.api.http
 
-import akka.NotUsed
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.model.StatusCodes.BadRequest
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{HttpCharsets, HttpEntity}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{Flow, Source}
-import akka.util.ByteString
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.MediaTypes._
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.model.{HttpCharsets, HttpEntity}
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.{Flow, Source}
+import org.apache.pekko.util.ByteString
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.uli.api.model.ULIModel._
 import hmda.uli.api.model.ULIValidationErrorMessages.{invalidLoanIdLengthMessage, nonAlpanumericLoanIdMessage}
 import hmda.uli.validation.ULI._
@@ -82,7 +82,7 @@ private class ULIHttpApi(log: Logger) {
                 respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                   fileUpload("file") {
                     case (_, byteSource) =>
-                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").toIterator)
+                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").iterator)
                       val checkDigit = processLoanIdFile(byteSource)
                         .map(l => l.toCSV)
                         .map(l => l + "\n")
@@ -155,7 +155,7 @@ private class ULIHttpApi(log: Logger) {
                   fileUpload("file") {
                     case (_, byteSource) =>
                       val headerSource =
-                        Source.fromIterator(() => List("uli,isValid\n").toIterator)
+                        Source.fromIterator(() => List("uli,isValid\n").iterator)
                       val validated = processUliFile(byteSource)
                         .map(u => u.toCSV)
                         .map(l => l + "\n")

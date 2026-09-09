@@ -2,7 +2,7 @@ package hmda.serialization.institution
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
+import org.apache.pekko.serialization.SerializerWithStringManifest
 import hmda.messages.institution.InstitutionEvents._
 import hmda.persistence.serialization.institution.events._
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._
@@ -44,7 +44,7 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
       institutionNotExistsToProtobuf(evt).toByteArray
     case evt: FilingAdded =>
       filingAddedToProtobuf(evt).toByteArray
-    case _ ⇒
+    case _ =>
       throw new IllegalArgumentException(s"Cannot serialize object of type [${o.getClass.getName}]")
   }
 

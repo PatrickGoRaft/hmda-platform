@@ -12,7 +12,8 @@ image:
 kafka:
   emailTopic: hmda-email
   emailGroup: email-consumer 
-
+  security: "SASL_SSL"
+  
 resources:
   limits:
     memory: "2200Mi"
@@ -31,6 +32,9 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+service:
+  account:
+    name: hmda-platform-irsa
 
 nodeSelector: {}
 

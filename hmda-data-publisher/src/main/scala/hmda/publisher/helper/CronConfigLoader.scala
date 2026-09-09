@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 
 object CronConfigLoader {
   private val log = LoggerFactory.getLogger(getClass)
-  private val dynamicQuartzScheduleConfig: Config = ConfigFactory.load().getConfig("akka.quartz.dynamic")
+  private val dynamicQuartzScheduleConfig: Config = ConfigFactory.load().getConfig("pekko.quartz.dynamic")
   val larPublicCron: String = dynamicQuartzScheduleConfig.getString("LarPublicSchedule.expression")
   val larPublicYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("LarPublicSchedule.years").split(",").map(s => s.toInt)
   val larCron: String = dynamicQuartzScheduleConfig.getString("LarSchedule.expression")
@@ -28,7 +28,12 @@ object CronConfigLoader {
   val tsPublicCron: String = dynamicQuartzScheduleConfig.getString("TsPublicSchedule.expression")
   val tsPublicYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsPublicSchedule.years").split(",").map(s => s.toInt)
   val tsCron: String = dynamicQuartzScheduleConfig.getString("TsSchedule.expression")
+  val tsAltCron: String = dynamicQuartzScheduleConfig.getString("TsAltSchedule.expression")
+
+
   val tsYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsSchedule.years").split(",").map(s => s.toInt)
+  val tsAltYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsAltSchedule.years").split(",").map(s => s.toInt)
+
   val tsQuarterlyCron: String = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule.expression")
   val tsQuarterlyYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("TsQuarterlySchedule.years").split(",").map(s => s.toInt)
 
@@ -40,6 +45,8 @@ object CronConfigLoader {
 
   val specificTsCron: String = dynamicQuartzScheduleConfig.getString("SpecificTsSchedule.expression")
   val specificTsYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("SpecificTsSchedule.years").split(",").map(s => s.toInt)
+  val specificTsAltCron: String = dynamicQuartzScheduleConfig.getString("SpecificTsAltSchedule.expression")
+  val specificTsAltYears: Seq[Int] = dynamicQuartzScheduleConfig.getString("SpecificTsAltSchedule.years").split(",").map(s => s.toInt)
 
 
 

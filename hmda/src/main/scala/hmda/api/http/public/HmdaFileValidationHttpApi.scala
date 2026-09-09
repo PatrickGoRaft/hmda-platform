@@ -1,15 +1,15 @@
 package hmda.api.http.public
 
-import akka.NotUsed
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
-import akka.stream.{ FlowShape, Materializer }
-import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.{ Broadcast, Concat, Flow, GraphDSL, Sink, Source }
+import org.apache.pekko.stream.{ FlowShape, Materializer }
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.model.validation.ValidationError
 import hmda.model.validation.LarValidationError
 import hmda.api.http.model.filing.submissions.HmdaRowParsedErrorSummary
@@ -41,7 +41,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
   private val validateYearRoute =
     path("validate" / IntNumber ) { year =>
       post {
-        parameters('check.as[String] ? "all") { checkType =>
+        parameters(Symbol("check").as[String] ? "all") { checkType =>
           fileUpload("file") {
             case (_, byteSource) =>
               val processF =
@@ -174,7 +174,7 @@ private class HmdaFileValidationHttpApi(implicit mat: Materializer) {
     val (lefts, rights) = el.partition(_.isLeft)
     ValidationErrorSummary(
       lefts.map(_.left.get),
-      rights.map(_.right.get).filter(_.isDefined).map(_.get).map(_.map(validationErrorToSummary(_, period)))
+      rights.map(_.toOption.get).filter(_.isDefined).map(_.get).map(_.map(validationErrorToSummary(_, period)))
     )
   }
 

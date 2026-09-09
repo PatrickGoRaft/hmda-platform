@@ -22,6 +22,10 @@ image:
 hmda:
   actorSystemName: hmda2
   runtimeMode: kubernetes
+  upload:
+    lines:
+      batch: 30
+      parallelism: 1
 #  podNamespace: default
 #  apiNamespace: hmda-api
 #  serviceNamespace: default.svc.cluster.local
@@ -33,11 +37,12 @@ kafka:
   analyticsTopic: hmda-analytics
   signTopic: hmda-sign
   disclosureTopic: hmda-spark-disclosure
+  security: "SASL_SSL"
 
 service:
   type: ClusterIP
   account:
-    name: hmda-platform
+    name: hmda-platform-irsa
   name: hmda-platform
 
 #ambassador:
@@ -68,12 +73,12 @@ public:
 cluster:
   name: management
   protocol: TCP
-  port: 8558
+  port: 7626
 
 bootstrap:
   name: bootstrap
   protocol: TCP
-  port: 8558
+  port: 7626
 
 websockets:
   name: websockets
@@ -105,7 +110,7 @@ ingress:
 
 resources:
   requests:
-   cpu: "2"
+   cpu: "500m"
    memory: 6200Mi
 
 nodeSelector: {}
@@ -127,5 +132,5 @@ affinity:
 logs:
   cassandra: TRACE
 
-ambassador_id: ambassador-default-1
-# ambassador_host: hmda-public.example.com
+# ambassador_id: ambassador-default-1
+ambassador_host: ffiec-test.cfpb.gov

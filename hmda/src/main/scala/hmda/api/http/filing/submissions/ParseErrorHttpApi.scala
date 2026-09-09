@@ -1,12 +1,12 @@
 package hmda.api.http.filing.submissions
 
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.http.scaladsl.model.{StatusCodes, Uri}
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.util.Timeout
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.QuarterlyFilingAuthorization._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
@@ -35,7 +35,7 @@ private class ParseErrorHttpApi(log: Logger, sharding: ClusterSharding)(implicit
   // GET institutions/<lei>/filings/<year>/submissions/<submissionId>/parseErrors
   // GET institutions/<lei>/filings/<year>/quarter/<q>/submissions/<submissionId>/parseErrors
   def parseErrorPath(oauth2Authorization: OAuth2Authorization): Route = (extractUri & get) { uri =>
-    parameters('page.as[Int] ? 1) { page =>
+    parameters(Symbol("page").as[Int] ? 1) { page =>
       pathPrefix("institutions" / Segment / "filings" / IntNumber) { (lei, year) =>
         oauth2Authorization.authorizeTokenWithLei(lei) { _ =>
           path("submissions" / IntNumber / "parseErrors") { seqNr =>

@@ -4,7 +4,7 @@ import sbtassembly.AssemblyPlugin.autoImport._
 
 object BuildSettings {
   val buildOrganization = "cfpb"
-  val buildVersion      = "2.0.0"
+  val buildVersion      = "latest"
   val buildScalaVersion = "2.13.12"
 
   lazy val dockerPublishLocalSkipTestsCommand = Command.command("dockerPublishLocalSkipTests") { state =>
@@ -19,11 +19,14 @@ object BuildSettings {
       organization := buildOrganization,
       version := buildVersion,
       scalaVersion := buildScalaVersion,
-      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ymacro-annotations"),
+      scalacOptions ++= Seq("-Xlint", "-deprecation", "-unchecked", "-feature", "-Ymacro-annotations","-DSCALACTIC_FILL_FILE_PATHNAMES=yes"),
       assembly / aggregate := false,
       Test / parallelExecution:= false,
       Test / fork := true,
-      resolvers += "Akka library repository".at("https://repo.akka.io/maven"),
+      Test / envVars    := Map("SCALACTIC_FILL_FILE_PATHNAMES" -> "yes"),
+      Test / javaOptions ++= Seq("-Xms4G", "-Xmx12G"),
+      Compile / envVars := Map("SCALACTIC_FILL_FILE_PATHNAMES" -> "yes"),
+      resolvers += "pekko library repository".at("https://repo.pekko.io/maven"),
       commands += dockerPublishLocalSkipTestsCommand
     )
 }

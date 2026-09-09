@@ -1,11 +1,11 @@
 package hmda.api.http.public
 
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.marshalling.ToResponseMarshallable
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.model.public.TsValidateRequest
 import hmda.api.http.public.FilingValidationHttpDirectives._
@@ -42,7 +42,7 @@ private class TsValidationHttpApi {
   //ts/validate/<year>
   private val validateYearTsRoute =
     path("validate" / IntNumber) { year =>
-      parameters('check.as[String] ? "all") { checkType =>
+      parameters(Symbol("check").as[String] ? "all") { checkType =>
         post {
           respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
@@ -62,7 +62,7 @@ private class TsValidationHttpApi {
   // $COVERAGE-OFF$
   private val validateQuarterTsRoute =
   path("validate" / IntNumber / "quarter" / Quarter) { (year, quarter) =>
-    parameters('check.as[String] ? "all") { checkType =>
+    parameters(Symbol("check").as[String] ? "all") { checkType =>
       post {
         respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
           entity(as[TsValidateRequest]) { req =>

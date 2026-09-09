@@ -1,15 +1,15 @@
 package hmda.publication.lar.publication
 
-import akka.NotUsed
-import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
-import akka.stream.scaladsl.{Sink, Source}
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.typed.Behavior
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory
 import hmda.census.records.CensusRecords
 import hmda.census.records.CensusRecords._
@@ -37,15 +37,15 @@ object IrsPublisher {
   val config = ConfigFactory.load()
   val bankFilter =
     ConfigFactory.load("application.conf").getConfig("filter")
-  val accessKeyId  = config.getString("aws.access-key-id")
-  val secretAccess = config.getString("aws.secret-access-key ")
+//  val accessKeyId  = config.getString("aws.access-key-id")
+//  val secretAccess = config.getString("aws.secret-access-key")
   val region       = config.getString("aws.region")
   val bucket       = config.getString("aws.public-bucket")
   val environment  = config.getString("aws.environment")
   val censusHost   = config.getString("hmda.census.http.host")
   val censusPort   = config.getInt("hmda.census.http.port")
 
-  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
+//  val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
 
   val awsRegionProvider: AwsRegionProvider = () => Region.of(region)
 
@@ -62,7 +62,7 @@ object IrsPublisher {
 
       val s3Settings = S3Settings(ctx.system.toClassic)
         .withBufferType(MemoryBufferType)
-        .withCredentialsProvider(awsCredentialsProvider)
+//        .withCredentialsProvider(awsCredentialsProvider)
         .withS3RegionProvider(awsRegionProvider)
         .withListBucketApiVersion(ListBucketVersion2)
 
@@ -84,7 +84,7 @@ object IrsPublisher {
           log.info(s"Publishing IRS for $submissionId for filing period $filingPeriod")
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
-            S3.multipartUpload(bucket, s"$environment/reports/disclosure/$filingPeriod/${submissionId.lei}/nationwide/IRS.csv")
+            S3.multipartUpload(bucket, s"reports/disclosure/$filingPeriod/${submissionId.lei}/nationwide/IRS.csv")
               .withAttributes(S3Attributes.settings(s3Settings))
 
           val msaSummarySource: Source[ByteString, NotUsed] = {

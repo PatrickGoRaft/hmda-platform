@@ -16,7 +16,8 @@ kafka:
   analyticsGroup: analytics-group
   analyticsTopic: hmda-analytics
   signTopic: hmda-sign
-
+  security: "SASL_SSL"
+  
 ingress:
   enabled: false
   annotations: {}
@@ -29,6 +30,10 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+service:
+  account:
+    name: hmda-platform-irsa
 
 resources:
   limits:
@@ -56,4 +61,4 @@ affinity: {}
 
 postgresql:
   enabled: false
-  createSchema: false
+  createSchema: true

@@ -1,22 +1,21 @@
 package hmda.calculator.scheduler
 
-import akka.actor.typed.SupervisorStrategy
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{Behavior, PostStop}
-import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings}
-import akka.stream.scaladsl.{Flow, Framing, Sink, Source}
-import akka.stream.{Attributes, Materializer}
-import akka.util.ByteString
-import akka.{Done, NotUsed}
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import org.apache.pekko.actor.typed.SupervisorStrategy
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.typed.scaladsl.adapter._
+import org.apache.pekko.actor.typed.{Behavior, PostStop}
+import org.apache.pekko.stream.connectors.s3.ApiVersion.ListBucketVersion2
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.connectors.s3.{MemoryBufferType, ObjectMetadata, S3Attributes, S3Settings}
+import org.apache.pekko.stream.scaladsl.{Flow, Framing, Sink, Source}
+import org.apache.pekko.stream.{Attributes, Materializer}
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.calculator.apor.{AporListEntity, FixedRate, RateType, VariableRate}
 import hmda.calculator.parser.APORCsvParser
 import org.slf4j.LoggerFactory
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
@@ -53,23 +52,18 @@ object APORScheduler {
             val variableRateFileName          = aporConfig.getString("variable.rate.fileName ")
 
             val awsConfig         = ConfigFactory.load("application.conf").getConfig("aws")
-            val accessKeyId       = awsConfig.getString("access-key-id")
-            val secretAccess      = awsConfig.getString("secret-access-key")
             val region            = awsConfig.getString("region")
             val bucket            = awsConfig.getString("public-bucket")
-            val environment       = awsConfig.getString("environment")
-            val fixedBucketKey    = s"$environment/apor/$fixedRateFileName"
-            val variableBucketKey = s"$environment/apor/$variableRateFileName"
+            val fixedBucketKey    = s"apor/$fixedRateFileName"
+            val variableBucketKey = s"apor/$variableRateFileName"
             val quartz            = QuartzSchedulerExtension(ctx.system)
 
-            val awsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccess))
             val awsRegionProvider: AwsRegionProvider = new AwsRegionProvider {
               override def getRegion: Region = Region.of(region)
             }
 
             val s3Settings = S3Settings(ctx.system.toClassic)
               .withBufferType(MemoryBufferType)
-              .withCredentialsProvider(awsCredentialsProvider)
               .withS3RegionProvider(awsRegionProvider)
               .withListBucketApiVersion(ListBucketVersion2)
 
@@ -131,7 +125,7 @@ object APORScheduler {
       .runWith(Sink.ignore)
   }
 
-  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType){
+  private def checkDownload(src: Option[(Source[ByteString, NotUsed], ObjectMetadata)],rateType: RateType): Unit = {
     if(src ==None){
       logger.error(s"${APORScheduler.name} had an error downloading APOR file for: "+ rateType)
     }

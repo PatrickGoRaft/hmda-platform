@@ -1,10 +1,10 @@
 package hmda.validation.filing
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.stream.scaladsl.Source
-import akka.stream.testkit.scaladsl.TestSink
-import akka.util.ByteString
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.stream.testkit.scaladsl.TestSink
+import org.apache.pekko.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
@@ -66,10 +66,10 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
   val errorRows: Seq[String] = errorTsTxt ++ errorLarTxt
 
   "Validation Flow" must {
-    val cleanHmdaFileSource = Source.fromIterator(() => cleanRows.toIterator)
+    val cleanHmdaFileSource = Source.fromIterator(() => cleanRows.iterator)
     val cleanTs             = TsCsvParser(cleanRows.head).getOrElse(TransmittalSheet())
     val cleanLars           = cleanRows.tail.map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-    val errorHmdaFileSource = Source.fromIterator(() => errorRows.toIterator)
+    val errorHmdaFileSource = Source.fromIterator(() => errorRows.iterator)
 
     "validate Transmittal Sheet" in {
       cleanHmdaFileSource

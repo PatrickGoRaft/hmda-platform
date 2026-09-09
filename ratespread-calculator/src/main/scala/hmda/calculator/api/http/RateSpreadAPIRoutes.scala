@@ -1,14 +1,14 @@
 package hmda.calculator.api.http
 
-import akka.http.scaladsl.model.MediaTypes.`text/csv`
-import akka.http.scaladsl.model.StatusCodes.BadRequest
-import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity }
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.http.scaladsl.model.MediaTypes.`text/csv`
+import org.apache.pekko.http.scaladsl.model.StatusCodes.BadRequest
+import org.apache.pekko.http.scaladsl.model.{ HttpCharsets, HttpEntity }
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.calculator.api.model.RateSpreadRequest
 import hmda.calculator.apor.APORCommands
 import hmda.calculator.parser.RateSpreadCSVParser
@@ -52,10 +52,10 @@ private class RateSpreadAPIRoutes(log: Logger) {
                 case (_, byteSource) =>
                   val headerSource =
                     Source.fromIterator(() =>
-                      List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").toIterator
+                      List("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread\n").iterator
                     )
                   val rateSpreadValues = processRateSpreadRow(byteSource)
-                    .map(rateSpread => rateSpread + "\n")
+                    .map(rateSpread => rateSpread.toString + "\n")
                     .map(s => ByteString(s))
 
                   val csv =

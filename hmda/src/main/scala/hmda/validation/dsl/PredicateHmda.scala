@@ -13,6 +13,8 @@ object PredicateHmda {
     case _ => false
   }
 
+  private def exemptCodes = List("1111", "Exempt" )
+
   private def checkDateFormat[T](s: String): Boolean =
     try {
       val format = new SimpleDateFormat("yyyyMMdd")
@@ -22,6 +24,10 @@ object PredicateHmda {
     } catch {
       case e: Exception => false
     }
+
+  private def checkExemption(larValue: String):Boolean={
+    exemptCodes.exists(code => code.equalsIgnoreCase(larValue))
+  }
 
   def exemptionTaken(lar: LoanApplicationRegister): Boolean = {
 
@@ -49,8 +55,26 @@ object PredicateHmda {
  lar.property.manufacturedHomeLandPropertyInterest == ManufacturedHomeLoanPropertyInterestExempt || 
  lar.property.manufacturedHomeSecuredProperty == ManufacturedHomeSecuredExempt ||
  lar.reverseMortgage == ExemptMortgageType || 
- lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt || 
+ lar.nonAmortizingFeatures.negativeAmortization == NegativeAmortizationExempt ||
  lar.nonAmortizingFeatures.otherNonAmortizingFeatures == OtherNonAmortizingFeaturesExempt || 
- lar.payableToInstitution == PayableToInstitutionExempt
+ lar.payableToInstitution == PayableToInstitutionExempt||
+ checkExemption( lar.geography.street) ||
+ checkExemption( lar.geography.city) ||
+ checkExemption( lar.geography.zipCode) ||
+ checkExemption( lar.loan.rateSpread) ||
+ checkExemption( lar.loanDisclosure.totalLoanCosts) ||
+ checkExemption( lar.loanDisclosure.totalPointsAndFees) ||
+ checkExemption( lar.loanDisclosure.originationCharges) ||
+ checkExemption( lar.loanDisclosure.discountPoints) ||
+ checkExemption( lar.loanDisclosure.lenderCredits) ||
+ checkExemption( lar.loan.interestRate) ||
+ checkExemption( lar.loan.prepaymentPenaltyTerm) ||
+ checkExemption( lar.loan.debtToIncomeRatio) ||
+ checkExemption( lar.loan.combinedLoanToValueRatio) ||
+ checkExemption( lar.loan.loanTerm) ||
+ checkExemption( lar.loan.introductoryRatePeriod) ||
+ checkExemption( lar.property.propertyValue) ||
+ checkExemption( lar.property.multiFamilyAffordableUnits) ||
+ checkExemption( lar.larIdentifier.NMLSRIdentifier)
   }
 }

@@ -1,10 +1,10 @@
 package hmda.dataBrowser.api
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.Source
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.stream.scaladsl.Source
 import cats.implicits._
 import hmda.dataBrowser.api.DataBrowserDirectives._
 import hmda.dataBrowser.models._
@@ -83,11 +83,15 @@ class DataBrowserDirectivesSpec extends WordSpec with ScalatestRouteTest with Ma
       }
 
       Get("/?ethnicities=offworld") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
       }
 
       Get("/?actions_taken=99999") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
-        response.status shouldBe StatusCodes.NotFound
+        response.status shouldBe StatusCodes.BadRequest
+      }
+
+      Get("/?ageapplicant=62") ~> Route.seal(failingRoute(extractNonMandatoryQueryFields("2018"))) ~> check {
+        response.status shouldBe StatusCodes.BadRequest
       }
     }
 

@@ -1,6 +1,6 @@
 package hmda.publication.lar.config
 
-import akka.actor.{ActorSystem => UntypedActorSystem}
+import org.apache.pekko.actor.{ActorSystem => UntypedActorSystem}
 import com.typesafe.config.Config
 import hmda.util.BankFilterUtils._
 
@@ -23,7 +23,16 @@ class Settings(config: Config) {
 
   object kafka {
     val bootstrapServers: String = config.getString("kafka.hosts")
-    val commitSettings: Config   = config.getConfig("kafka.commit")
+    val commitSettings: Config   = config.getConfig("kafka.committer")
+  }
+
+  object client {
+    private val clientPath = config.getConfig("hmda.client")
+    val protocol: String = clientPath.getString("protocol")
+    val smtpHost: String = clientPath.getString("host")
+    val smtpPort: Int = clientPath.getInt("port")
+    val smtpUsername: String = clientPath.getString("username")
+    val smtpPassword: String = clientPath.getString("password")
   }
 }
 

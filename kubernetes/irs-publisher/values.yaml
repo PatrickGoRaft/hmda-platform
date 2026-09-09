@@ -16,7 +16,8 @@ kafka:
   irsGroup: irs-group
   irsTopic: hmda-irs
   signTopic: hmda-sign
-
+  security: "SASL_SSL"
+    
 ingress:
   enabled: false
   annotations: {}

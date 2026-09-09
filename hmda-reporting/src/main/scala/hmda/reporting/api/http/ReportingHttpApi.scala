@@ -1,11 +1,11 @@
 package hmda.reporting.api.http
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
+import org.apache.pekko.http.scaladsl.model.StatusCodes
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{ cors, corsRejectionHandler }
 import com.typesafe.config.Config
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.model.institution.{ HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse }
 import hmda.query.repository.ModifiedLarRepository
 import hmda.reporting.repository.InstitutionComponent
@@ -34,6 +34,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
   private val institutionRepository2022 = new InstitutionRepository(databaseConfig, "institutions2022")
   private val institutionRepository2023 = new InstitutionRepository(databaseConfig, "institutions2023")
   private val institutionRepository2024 = new InstitutionRepository(databaseConfig, "institutions2024")
+  private val institutionRepository2025 = new InstitutionRepository(databaseConfig, "institutions2025")
 
 
   private val filerListRoute: Route = {
@@ -141,6 +142,20 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
                   )
                   .toSet
               )
+          case 2025 =>
+            institutionRepository2025
+              .getFilteredFilers(bankFilterList)
+              .map(sheets =>
+                sheets
+                  .map(instituionEntity =>
+                    HmdaFiler(
+                      instituionEntity.lei.toUpperCase,
+                      instituionEntity.respondentName,
+                      instituionEntity.activityYear.toString
+                    )
+                  )
+                  .toSet
+              )
           case _ => Future(Set(HmdaFiler("", "", "")))
         }
 
@@ -163,6 +178,7 @@ private class ReportingHttpApi(config: Config)(implicit ec: ExecutionContext) ex
             case 2022 => institutionRepository2022
             case 2023 => institutionRepository2023
             case 2024 => institutionRepository2024
+            case 2025 => institutionRepository2025
 
 
 

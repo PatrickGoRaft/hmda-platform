@@ -1,12 +1,12 @@
 package hmda.dataBrowser.services
 
-import akka.NotUsed
-import akka.http.scaladsl.model.ContentTypes
-import akka.stream.Materializer
-import akka.stream.alpakka.s3.S3Headers
-import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.typed.ActorSystem
+import org.apache.pekko.http.scaladsl.model.ContentTypes
+import org.apache.pekko.stream.connectors.s3.S3Headers
+import org.apache.pekko.stream.connectors.s3.scaladsl.S3
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
+import org.apache.pekko.util.ByteString
 import cats.implicits._
 import hmda.dataBrowser.Settings
 import hmda.dataBrowser.models.Delimiter.fileEnding
@@ -15,8 +15,8 @@ import monix.eval.Task
 import org.slf4j.LoggerFactory
 
 // $COVERAGE-OFF$
-// All this does is use the Alpakka S3 APIs
-class S3FileService(implicit mat: Materializer) extends FileService with Settings {
+// All this does is use the pekko S3 APIs
+class S3FileService(implicit system: ActorSystem[Nothing]) extends FileService with Settings {
 
   private final val log = LoggerFactory.getLogger(getClass)
 
@@ -82,7 +82,7 @@ class S3FileService(implicit mat: Materializer) extends FileService with Setting
   private def s3Key(queries: List[QueryField], delimiter: Delimiter, year: String): String = {
     val input = md5HashString(formName(queries))
     println ("This is the input: " + input)
-    val key = s"${s3.environment}/${s3.tableSelector(year.toInt)}/$input"
+    val key = s"${s3.tableSelector(year.toInt)}/$input"
     s"$key${fileEnding(delimiter)}"
   }
 

@@ -2,14 +2,14 @@ package hmda.api.http.filing
 
 import java.time.Instant
 
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import org.apache.pekko.cluster.sharding.typed.scaladsl.ClusterSharding
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.model.{StatusCodes, Uri}
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import org.apache.pekko.util.Timeout
+import org.apache.pekko.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import hmda.api.http.PathMatchers._
 import hmda.api.http.directives.CreateFilingAuthorization._
 import hmda.api.http.directives.QuarterlyFilingAuthorization.quarterlyFilingAllowed
@@ -57,7 +57,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
             } ~
               // GET/institutions/<lei>/filings/<year>
               (get & extractUri) { uri =>
-                parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
+                parameter(Symbol("page").as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, year, None, uri, pageNumber))
               }
           }
         }
@@ -71,7 +71,7 @@ private class FilingHttpApi(log: Logger, sharding: ClusterSharding)(implicit val
               } ~
                 // GET /institutions/<lei>/filings/<year>/quarters/<quarter>
                 (get & extractUri) { uri =>
-                  parameter('page.as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
+                  parameter(Symbol("page").as[Int] ? 1)(pageNumber => getFilingForInstitution(lei, period, Option(quarter), uri, pageNumber))
                 }
             }
           }
